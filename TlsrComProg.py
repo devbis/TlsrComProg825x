@@ -430,7 +430,7 @@ def main():
         # print(read_count, sent_count)
         if read_count != sent_count:
             sent_count = 0
-            warn += 1
+            # warn += 1
             print('Warning: Wrong RX-TX connection?')
         # Start read
         serial_port.write(b'\xff')
