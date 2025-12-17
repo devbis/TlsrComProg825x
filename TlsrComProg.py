@@ -361,8 +361,12 @@ def main():
         time.sleep(0.05)
         serial_port.close()
         sys.exit(0)
+    sleep_multiplier = 1
     if platform.system() == "Linux":
         serial_port.timeout = 0.2
+    elif platform.system() == "Darwin":
+        serial_port.timeout = 0.2
+        sleep_multiplier = 10
     else:
         serial_port.timeout = 33 * 12 / args.baud + 0.001
     # --------------------------------
@@ -465,12 +469,12 @@ def main():
         print('\rBin bytes writen:', binWrite)
         print('CPU go Start...')
         sent_count += serial_port.write(sws_wr_addr(0x0602, b'\x88'))  # cpu go Start
-        time.sleep(0.07)
+        time.sleep(0.07 * sleep_multiplier)
         serial_port.flushInput()
         serial_port.flushOutput()
         serial_port.reset_input_buffer()
         serial_port.reset_output_buffer()
-        time.sleep(0.07)
+        time.sleep(0.07 * sleep_multiplier)
     # print('COM bytes sent:', sent_count)
     print('------------------------------------------------')
     # print('Get version floader...')
