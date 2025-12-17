@@ -292,6 +292,10 @@ def main():
         help='Unlock Flash (option command Erase/Write)',
         action="store_true")
     parser.add_argument(
+        '--debug', '-d',
+        help='Debug communication',
+        action="store_true")
+    parser.add_argument(
         '--rst', '-r',
         help='Reset (RTS low) (post main processing)')
     subparsers = parser.add_subparsers(
@@ -350,9 +354,30 @@ def main():
         serial_port.flushOutput()
         serial_port.reset_input_buffer()
         serial_port.reset_output_buffer()
+        serial_port.debug = False
     except:
         print('Error: Open %s, %d baud!' % (args.port, args.baud))
         sys.exit(1)
+
+    if args.debug:
+        serial.debug = True
+        orig_write = serial_port.write
+        orig_read = serial_port.read
+        def write(data):
+            # print(f'> len({len(data)})')
+            if serial_port.debug:
+                print(f'.. > {bytes(data).hex(" ")}')
+            return orig_write(data)
+
+        def read(size=1):
+            data = orig_read(size)
+            if serial_port.debug:
+                print(f'.. < {data.hex(" ")}')
+            return data
+
+        serial_port.write = write
+        serial_port.read = read
+
     warn = 0
     if args.operation == 'rst':
         print('Reset module (RTS low)...')
@@ -454,6 +479,7 @@ def main():
         rdsize = 0x100
         addr = 0x40000
         print('Load <%s> to 0x%04x...' % (args.fldr, addr))
+        serial_port.debug = False
         while size > 0:
             print('\r0x%04x' % addr, end='')
             data = stream.read(rdsize)
@@ -465,6 +491,7 @@ def main():
             binWrite += len(data)
             addr += len(data)
             size -= len(data)
+        serial_port.debug = True
         stream.close()
         print('\rBin bytes writen:', binWrite)
         print('CPU go Start...')
