@@ -297,7 +297,8 @@ def main():
         action="store_true")
     parser.add_argument(
         '--rst', '-r',
-        help='Reset (RTS low) (post main processing)')
+        help='Reset (RTS low) (post main processing)',
+        action="store_true")
     subparsers = parser.add_subparsers(
         dest='operation',
         help='Run ' + __filename__ + ' {command} -h for additional help')
@@ -360,7 +361,7 @@ def main():
         sys.exit(1)
 
     if args.debug:
-        serial.debug = True
+        serial_port.debug = True
         orig_write = serial_port.write
         orig_read = serial_port.read
         def write(data):
